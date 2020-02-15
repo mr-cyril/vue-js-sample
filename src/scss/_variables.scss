@@ -1,0 +1,23 @@
+@import "~bootstrap/scss/mixins/breakpoints";
+@import "~bootstrap/scss/functions";
+
+// Color system
+$white: #fff !default;
+$black: #000 !default;
+
+$blue: #156cab !default;
+$red: #bb0909 !default;
+$yellow: #efc25c !default;
+$green: #7cb53a !default;
+$gray: #cbcbcb !default;
+
+$primary: $blue !default;
+$secondary: $gray !default;
+$success: $green !default;
+$warning: $yellow !default;
+$danger: $red !default;
+
+// Options
+$enable-shadows: false !default;
+$enable-gradients: false !default;
+$enable-responsive-font-sizes: true !default;
