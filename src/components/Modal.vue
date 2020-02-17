@@ -1,15 +1,17 @@
 <template>
   <div
     class="modal fade"
-    :class="classModal"
-    :style="styleModal"
+    :class="className"
+    :style="style"
     tabindex="-1"
     role="dialog"
   >
     <div class="modal-dialog modal-dialog-centered" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">Modal title</h5>
+          <h5 v-if="!!$slots.title" class="modal-title">
+            <slot name="title"></slot>
+          </h5>
           <button
             type="button"
             class="close"
@@ -22,43 +24,11 @@
         </div>
 
         <div class="modal-body">
-          <p>Modal body text goes here.</p>
-          <p>Modal body text goes here.</p>
-          <p>Modal body text goes here.</p>
-          <p>Modal body text goes here.</p>
-          <p>Modal body text goes here.</p>
-          <p>Modal body text goes here.</p>
-          <p>Modal body text goes here.</p>
-          <p>Modal body text goes here.</p>
-          <p>Modal body text goes here.</p>
-          <p>Modal body text goes here.</p>
-          <p>Modal body text goes here.</p>
-          <p>Modal body text goes here.</p>
-          <p>Modal body text goes here.</p>
-          <p>Modal body text goes here.</p>
-          <p>Modal body text goes here.</p>
-          <p>Modal body text goes here.</p>
-          <p>Modal body text goes here.</p>
-          <p>Modal body text goes here.</p>
-          <p>Modal body text goes here.</p>
-          <p>Modal body text goes here.</p>
-          <p>Modal body text goes here.</p>
-          <p>Modal body text goes here.</p>
-          <p>Modal body text goes here.</p>
-          <p>Modal body text goes here.</p>
-          <p>Modal body text goes here.</p>
+          <slot></slot>
         </div>
 
-        <div class="modal-footer">
-          <button type="button" class="btn btn-primary">Save</button>
-          <button
-            type="button"
-            class="btn btn-secondary"
-            data-dismiss="modal"
-            @click="close"
-          >
-            Close
-          </button>
+        <div v-if="!!$slots.footer" class="modal-footer">
+          <slot name="footer"></slot>
         </div>
       </div>
     </div>
@@ -67,33 +37,21 @@
 
 <script>
 import Vue from "vue";
-import { mapGetters, mapActions } from "vuex";
 import _ from "lodash";
+
+import modalMixin from "@/mixins/modalMixin";
 
 export default Vue.extend({
   name: "Modal",
 
-  props: {
-    open: {
-      type: Boolean,
-      default: false
-    }
-  },
+  mixins: [modalMixin],
 
   data() {
     return {
       openHandle: undefined,
-      classModal: { show: false },
-      styleModal: { display: "none" }
+      className: { show: false },
+      style: { display: "none" }
     };
-  },
-
-  computed: {},
-
-  methods: {
-    close() {
-      this.$emit("update:open", false);
-    }
   },
 
   watch: {
@@ -102,18 +60,18 @@ export default Vue.extend({
         if (this.openHandle) clearTimeout(this.openHandle);
         if (open) {
           document.body.classList.add("modal-open");
-          this.$set(this.styleModal, "display", "block");
-          this.openHandle = setTimeout(
-            () => this.$set(this.classModal, "show", true),
-            300
-          );
+          this.$set(this.style, "display", "block");
+          this.openHandle = setTimeout(() => {
+            this.$set(this.className, "show", true);
+            this.show();
+          }, 300);
         } else {
           document.body.classList.remove("modal-open");
-          this.$set(this.classModal, "show", false);
-          this.openHandle = setTimeout(
-            () => this.$set(this.styleModal, "display", "none"),
-            300
-          );
+          this.$set(this.className, "show", false);
+          this.openHandle = setTimeout(() => {
+            this.$set(this.style, "display", "none");
+            this.hide();
+          }, 300);
         }
       },
       immediate: true

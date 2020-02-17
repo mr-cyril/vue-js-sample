@@ -1,4 +1,6 @@
+import * as Cookie from "js-cookie";
 import axios from "axios";
+import _ from "lodash";
 
 class HttpConsumer {
   constructor(params = undefined) {
@@ -49,11 +51,15 @@ class HttpConsumer {
   }
 }
 
+const token = _.defaultTo(Cookie.get("token"), null);
 const http = new HttpConsumer({
   baseURL: process.env.BASE_URL,
   timeout: 60000,
   withCredentials: false,
-  headers: { "Content-Type": "application/json" },
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: token ? `Bearer ${token}` : undefined
+  },
   responseType: "json"
 });
 

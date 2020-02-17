@@ -1,1 +1,11 @@
-[]
+[
+    {
+        "user": {
+            "id": 1,
+            "name": "admin",
+            "login": "admin",
+            "password": "123456"
+        },
+        "token": "775fb612-ba9e-41fc-86de-18a350176802"
+    }
+]

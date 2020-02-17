@@ -11,10 +11,18 @@
 
 <script>
 import Vue from "vue";
-import { mapGetters, mapActions } from "vuex";
+import _ from "lodash";
 
 export default Vue.extend({
-  name: "App"
+  name: "App",
+
+  mounted() {
+    _.attempt(async () => {
+      if (this.$store.getters["auth/isAuthenticated"]) {
+        await this.$store.dispatch("auth/fetchUserInfo");
+      }
+    });
+  }
 });
 </script>
 

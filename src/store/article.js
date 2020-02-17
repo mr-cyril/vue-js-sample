@@ -63,6 +63,7 @@ const article = {
       try {
         response = await http.get("/api/articles/last");
         data = response.data;
+
         commit("setDetail", data);
         await dispatch("fetchComments", data.id);
         commit("unlock");
@@ -74,6 +75,7 @@ const article = {
         commit("unlock");
       }
     },
+
     fetchComments: async ({ commit, dispatch }, articleId) => {
       commit("cleanError");
       commit("lock");
@@ -83,6 +85,7 @@ const article = {
         response = await http.get(`/api/articles/comments/${articleId}`);
         data = response.data;
         console.log(response);
+
         commit("setComments", data);
         commit("unlock");
       } catch (error) {
@@ -92,8 +95,6 @@ const article = {
         commit("setError", data.message);
         commit("unlock");
       }
-
-      commit("unlock");
     }
   }
 };

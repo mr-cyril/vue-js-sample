@@ -1,28 +1,48 @@
 <template>
   <div class="home">
     <img alt="Vue logo" src="../assets/logo.png" />
-    <HelloWorld msg="Welcome to Your Vue.js App" />
 
     <div>
-      <template v-if="!isAuthorized">
-        <button type="button">Регистрация</button>
-        <button type="button" v-on:click="openModal">Авторизация</button>
+      <template v-if="!isAuthenticated">
+        <button
+          class="btn btn-outline-primary btn-sm"
+          type="button"
+          @click="openModal(modalType.signup)"
+        >
+          Регистрация
+        </button>
+        |
+        <button
+          class="btn btn-primary btn-sm"
+          type="button"
+          @click="openModal(modalType.signin)"
+        >
+          Авторизация
+        </button>
       </template>
-      <template v-else>
-        <span>Admin</span>
+      <template v-else-if="isAuthorized">
+        <span>{{ user.name }}</span> |
+        <button class="btn btn-primary btn-sm" type="button" @click="signout">
+          Выход
+        </button>
+      </template>
+      <template v-else-if="isLoading">
+        <div class="d-flex justify-content-center">
+          <Spinner tagName="div" color="primary" />
+        </div>
       </template>
     </div>
 
-    <template v-if="showModal">
-      <div>
-        <input type="text" name="login" v-model="login" /> |
-        <input type="password" name="password" v-model="password" /> |
-        <button v-on:click="doSignin">Войти</button>
-      </div>
+    <template v-if="!isAuthorized">
+      <component
+        :is="selectedModalComponent"
+        :open="showModal"
+        @hide="unselectFormComponent"
+        @close="closeModal"
+        @submit="onSubmit"
+      />
+      <ModalBackdrop :open="showModal" />
     </template>
-
-    <Modal :open.sync="showModal" />
-    <ModalBackdrop :open="showModal" />
   </div>
 </template>
 
@@ -30,48 +50,84 @@
 import Vue from "vue";
 import { mapGetters, mapActions } from "vuex";
 
-import HelloWorld from "@/components/HelloWorld.vue";
-import Modal from "@/components/Modal.vue";
+import ModalSignIn from "@/components/ModalSignIn.vue";
+import ModalSignUp from "@/components/ModalSignUp.vue";
 import ModalBackdrop from "@/components/ModalBackdrop.vue";
+import Spinner from "@/components/Spinner.vue";
+
+const modalType = Object.freeze({
+  signin: "signin",
+  signup: "signup"
+});
 
 export default Vue.extend({
   name: "Home",
 
   components: {
-    HelloWorld,
-    Modal,
-    ModalBackdrop
+    ModalSignIn,
+    ModalSignUp,
+    ModalBackdrop,
+    Spinner
   },
 
   data() {
     return {
-      login: "",
-      password: "",
-      showModal: false
+      modalType,
+      showModal: false,
+      selectedModalComponent: undefined
     };
   },
 
   computed: {
     ...mapGetters({
-      isAuthorized: "auth/isAuthorized"
+      isAuthenticated: "auth/isAuthenticated",
+      isAuthorized: "auth/isAuthorized",
+      isLoading: "auth/isLoading",
+      user: "auth/user"
     })
   },
 
   methods: {
     ...mapActions({
-      signin: "auth/signin"
+      signin: "auth/signin",
+      signup: "auth/signup",
+      signout: "auth/signout"
     }),
-    openModal() {
-      this.showModal = true;
+    openModal(type) {
+      switch (type) {
+        case modalType.signin:
+          this.selectedModalComponent = this.$options.components.ModalSignIn;
+          this.showModal = true;
+          break;
+        case modalType.signup:
+          this.selectedModalComponent = this.$options.components.ModalSignUp;
+          this.showModal = true;
+          break;
+        default:
+          this.selectedModalComponent = undefined;
+          this.showModal = false;
+          break;
+      }
     },
-    hideModal() {
+    closeModal() {
       this.showModal = false;
     },
-    async doSignin() {
-      const login = this.login;
-      const password = this.password;
-      await this.signin({ login, password });
-      this.hideModal();
+    unselectFormComponent() {
+      this.selectedModalComponent = undefined;
+    },
+    async onSubmit(...args) {
+      switch (this.selectedModalComponent) {
+        case this.$options.components.ModalSignIn:
+          console.log("signin", ...args);
+          if (await this.signin(...args)) this.showModal = false;
+          break;
+        case this.$options.components.ModalSignUp:
+          console.log("signup", ...args);
+          if (await this.signup(...args)) this.showModal = false;
+          break;
+        default:
+          break;
+      }
     }
   }
 });

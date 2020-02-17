@@ -19,7 +19,8 @@ const auth = {
     isLoading: state => _.gt(state.lockingPool, 0),
     error: state => state.error,
     user: state => state.user,
-    userId: state => _.get(state, ["user", "id"], null)
+    userId: state => _.get(state, ["user", "id"], null),
+    token: state => state.token
   },
 
   mutations: {
@@ -56,6 +57,10 @@ const auth = {
     resetToken: state => {
       Cookie.remove("token");
       state.token = null;
+    },
+
+    setUser: (state, user) => {
+      state.user = user;
     }
   },
 
@@ -77,107 +82,86 @@ const auth = {
       // dispatch("cleanUpStore", null, { root: true });
     },
 
-    signin: async (
-      { commit, dispatch, state, getters },
-      { login, password }
-    ) => {
+    signin: async ({ commit, dispatch, getters }, { login, password }) => {
       commit("cleanError");
       commit("lock");
 
-      let response, data;
+      let response, data, token;
       try {
         response = await http.post("/api/signin", { login, password });
-        data = response.data;
-        console.log(response);
+        token = response.data;
+
+        if (getters.isAuthenticated) await dispatch("signout");
+        commit("setToken", token);
+        await dispatch("fetchUserInfo");
         commit("unlock");
 
-        if (getters.isAuthenticated) dispatch("signout");
-        const token = data.token;
-        commit("setToken", token);
-
-        // await dispatch("getUserInfo");
+        return true;
       } catch (error) {
         response = _.defaultTo(error.response, _.stubObject());
         data = response.data;
-        console.error(response);
+
         if (response.status == 401) {
+          commit("resetToken");
+        }
+        commit("setError", data.message);
+        commit("unlock");
+
+        return false;
+      }
+    },
+
+    signup: async (
+      { commit, dispatch, getters },
+      { name, login, password }
+    ) => {
+      commit("setError", null);
+      commit("lock");
+
+      let response, data, token;
+      try {
+        response = await http.post("/api/signup", { name, login, password });
+        token = response.data;
+
+        if (getters.isAuthenticated) await dispatch("signout");
+        commit("setToken", token);
+        await dispatch("fetchUserInfo");
+        commit("unlock");
+
+        return true;
+      } catch (error) {
+        response = _.defaultTo(error.response, _.stubObject());
+        data = response.data;
+
+        commit("setError", data.message);
+        commit("unlock");
+
+        return false;
+      }
+    },
+
+    fetchUserInfo: async ({ commit, getters }) => {
+      commit("cleanError");
+      commit("lock");
+
+      let response, data, user;
+      try {
+        response = await http.get("/api/userinfo");
+        user = response.data;
+
+        commit("setUser", user);
+        commit("unlock");
+      } catch (error) {
+        response = _.defaultTo(error.response, _.stubObject());
+        data = response.data;
+
+        if (getters.isAuthenticated && response.status == 403) {
           commit("resetToken");
         }
         commit("setError", data.message);
         commit("unlock");
       }
     }
-
-    // signup: async ({ commit }, user) => {
-    //     commit("setError", null);
-    //     commit("lock");
-
-    //     try {
-    //         if (!_.isObjectLike(user) || _.isArray(user)) user = _.stubObject();
-    //         let roleId = _.get(user, "roleId", null);
-    //         let result;
-    //         switch (roleId) {
-    //             case role.legal:
-    //                 result = httpResponse(
-    //                     await http.post(
-    //                         arrayToString([
-    //                             process.env.VUE_APP_URL_API,
-    //                             process.env.VUE_APP_URL_API_USERS,
-    //                             `/CreateJuridicalPerson`
-    //                         ]),
-    //                         httpRequest(user)
-    //                     )
-    //                 );
-    //                 break;
-    //             default:
-    //                 result = httpResponse(
-    //                     await http.post(
-    //                         arrayToString([
-    //                             process.env.VUE_APP_URL_API,
-    //                             process.env.VUE_APP_URL_API_USERS
-    //                         ]),
-    //                         httpRequest(user)
-    //                     )
-    //                 );
-    //                 break;
-    //         }
-
-    //         commit("unlock");
-    //     } catch (error) {
-    //         let { errorType, errorDetails } = fetchDataFromBadRequest(error);
-    //         console.error("auth/register", { errorType, errorDetails });
-
-    //         if (errorDetails !== null) commit("AUTH_ERROR", errorDetails);
-    //         else commit("AUTH_ERROR");
-    //         commit("unlock");
-    //     }
-    // },
-
-    // getUserInfo: async ({ commit }) => {
-    //     commit("setError", null);
-    //     commit("lock");
-
-    //     try {
-    //         let { json } = httpResponse(
-    //             await http.get(
-    //                 arrayToString([
-    //                     process.env.VUE_APP_URL_API,
-    //                     process.env.VUE_APP_URL_API_USER_INFO
-    //                 ])
-    //             )
-    //         );
-
-    //         commit("SET_AUTH_INFO", json);
-    //         commit("unlock");
-    //     } catch (error) {
-    //         let { errorType, errorDetails } = fetchDataFromBadRequest(error);
-    //         console.error("auth/getUserInfo", { errorType, errorDetails });
-
-    //         if (errorDetails !== null) commit("setError", errorDetails);
-    //         else commit("setError");
-    //         commit("unlock");
-    //     }
-    // }
   }
 };
 

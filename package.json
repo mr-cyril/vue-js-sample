@@ -51,6 +51,9 @@
       "eslint:recommended",
       "@vue/prettier"
     ],
+    "plugins": [
+      "vue"
+    ],
     "parserOptions": {
       "parser": "babel-eslint"
     },
