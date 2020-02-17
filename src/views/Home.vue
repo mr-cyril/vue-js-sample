@@ -33,16 +33,15 @@
       </template>
     </div>
 
-    <template v-if="!isAuthorized">
-      <component
-        :is="selectedModalComponent"
-        :open="showModal"
-        @hide="unselectFormComponent"
-        @close="closeModal"
-        @submit="onSubmit"
-      />
-      <ModalBackdrop :open="showModal" />
-    </template>
+    <component
+      ref="form"
+      :is="selectedModalComponent"
+      :open="showModal"
+      @hide="unselectFormComponent"
+      @close="closeModal"
+      @submit="onSubmit"
+    />
+    <ModalBackdrop v-if="selectedModalComponent" :open="showModal" />
   </div>
 </template>
 
@@ -93,6 +92,7 @@ export default Vue.extend({
       signup: "auth/signup",
       signout: "auth/signout"
     }),
+
     openModal(type) {
       switch (type) {
         case modalType.signin:
@@ -109,21 +109,38 @@ export default Vue.extend({
           break;
       }
     },
+
     closeModal() {
       this.showModal = false;
     },
+
     unselectFormComponent() {
       this.selectedModalComponent = undefined;
     },
+
     async onSubmit(...args) {
       switch (this.selectedModalComponent) {
         case this.$options.components.ModalSignIn:
           console.log("signin", ...args);
-          if (await this.signin(...args)) this.showModal = false;
+          if (await this.signin(...args)) {
+            this.showModal = false;
+
+            await this.$nextTick();
+            if (this.$refs.form) {
+              this.$refs.form.reset();
+            }
+          }
           break;
         case this.$options.components.ModalSignUp:
           console.log("signup", ...args);
-          if (await this.signup(...args)) this.showModal = false;
+          if (await this.signup(...args)) {
+            this.showModal = false;
+
+            await this.$nextTick();
+            if (this.$refs.form) {
+              this.$refs.form.reset();
+            }
+          }
           break;
         default:
           break;

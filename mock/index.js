@@ -3,7 +3,7 @@ import uuid from "./utilities/uuid";
 
 import users from "./users.json";
 import articles from "./articles.json";
-import articlesComments from "./articles_comments.json";
+import articleComments from "./article_comments.json";
 
 const delay = (cb, wait = undefined) =>
   setTimeout(cb, _.defaultTo(_.toNumber(wait), _.random(100, 1100)));
@@ -11,7 +11,7 @@ const delay = (cb, wait = undefined) =>
 const db = Object.seal({
   users,
   articles,
-  articlesComments
+  articleComments
 });
 
 const selectUserLastInsertId = () =>
@@ -31,12 +31,22 @@ const selectUserById = id =>
 
 const selectArticleCommentsById = id =>
   _.map(
-    _.filter(db.articlesComments, record => _.eq(+id, +record.articleId)),
+    _.filter(db.articleComments, record => _.eq(+id, +record.articleId)),
     record => ({
       ...record,
       user: _.pick(selectUserById(record.userId), ["id", "name"])
     })
   );
+
+const selectArticleCommentsLastInsertId = () =>
+  _.defaultTo(_.toNumber(_.get(_.last(articleComments), "id")), 0);
+
+const getToken = request => {
+  const authorization = _.defaultTo(request.headers.authorization, "");
+  const match = authorization.match(/Bearer (.*)/);
+  if (!_.isNil(match)) return match[1];
+  return null;
+};
 
 export default {
   // "GET /api/user": {
@@ -94,10 +104,8 @@ export default {
     return delay(() => res.json(record.token));
   },
   "GET /api/userinfo": (req, res) => {
-    const authorization = _.defaultTo(req.headers.authorization, "");
-    const match = authorization.match(/Bearer (.*)/);
-    if (!_.isNil(match)) {
-      const token = match[1];
+    const token = getToken(req);
+    if (!_.isNil(token)) {
       const user = selectUserByToken(token);
       if (!_.isNil(user)) {
         return delay(() => res.json(user));
@@ -116,5 +124,19 @@ export default {
       return delay(() => res.json(records));
     }
     return res.json([]);
+  },
+  "POST /api/articles/comments": (req, res) => {
+    const { articleId, userId, datetime, text } = req.body;
+    const lastId = selectArticleCommentsLastInsertId(articleId);
+    const id = lastId > 0 ? lastId + 1 : 1;
+    const user = null;
+    const record = { id, articleId, userId, user, datetime, text };
+    db.articleComments = [...db.articleComments, record];
+    return delay(() =>
+      res.json({
+        ...record,
+        user: _.pick(selectUserById(record.userId), ["id", "name"])
+      })
+    );
   }
 };

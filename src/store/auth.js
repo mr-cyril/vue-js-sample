@@ -54,7 +54,7 @@ const auth = {
       state.token = token;
     },
 
-    resetToken: state => {
+    unsetToken: state => {
       Cookie.remove("token");
       state.token = null;
     },
@@ -78,7 +78,8 @@ const auth = {
     // },
 
     signout: async ({ commit, dispatch }) => {
-      commit("resetToken");
+      commit("unsetToken");
+      commit("clean");
       // dispatch("cleanUpStore", null, { root: true });
     },
 
@@ -102,7 +103,7 @@ const auth = {
         data = response.data;
 
         if (response.status == 401) {
-          commit("resetToken");
+          commit("unsetToken");
         }
         commit("setError", data.message);
         commit("unlock");
@@ -156,7 +157,7 @@ const auth = {
         data = response.data;
 
         if (getters.isAuthenticated && response.status == 403) {
-          commit("resetToken");
+          commit("unsetToken");
         }
         commit("setError", data.message);
         commit("unlock");

@@ -51,6 +51,10 @@ const article = {
 
     setComments: (state, comments) => {
       state.comments = comments;
+    },
+
+    putComment: (state, comment) => {
+      state.comments = [...state.comments, comment];
     }
   },
 
@@ -59,18 +63,18 @@ const article = {
       commit("clean");
       commit("lock");
 
-      let response, data;
+      let response, data, detail;
       try {
         response = await http.get("/api/articles/last");
-        data = response.data;
+        detail = response.data;
 
-        commit("setDetail", data);
-        await dispatch("fetchComments", data.id);
+        commit("setDetail", detail);
+        await dispatch("fetchComments", detail.id);
         commit("unlock");
       } catch (error) {
         response = _.defaultTo(error.response, _.stubObject());
         data = response.data;
-        console.error(response);
+
         commit("setError", data.message);
         commit("unlock");
       }
@@ -80,18 +84,45 @@ const article = {
       commit("cleanError");
       commit("lock");
 
-      let response, data;
+      let response, data, comments;
       try {
         response = await http.get(`/api/articles/comments/${articleId}`);
-        data = response.data;
-        console.log(response);
+        comments = response.data;
 
-        commit("setComments", data);
+        commit("setComments", comments);
         commit("unlock");
       } catch (error) {
         response = _.defaultTo(error.response, _.stubObject());
         data = response.data;
-        console.error(response);
+
+        commit("setError", data.message);
+        commit("unlock");
+      }
+    },
+
+    createComment: async (
+      { commit, dispatch },
+      { articleId, userId, datetime, text }
+    ) => {
+      commit("cleanError");
+      commit("lock");
+
+      let response, data, comment;
+      try {
+        response = await http.post(`/api/articles/comments`, {
+          articleId,
+          userId,
+          datetime,
+          text
+        });
+        comment = response.data;
+
+        commit("putComment", comment);
+        commit("unlock");
+      } catch (error) {
+        response = _.defaultTo(error.response, _.stubObject());
+        data = response.data;
+
         commit("setError", data.message);
         commit("unlock");
       }

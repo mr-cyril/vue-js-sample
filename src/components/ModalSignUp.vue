@@ -1,18 +1,45 @@
 <template>
   <Modal :open="open" @close="close" @show="show" @hide="hide">
     <form id="signup" @submit.prevent="submit">
-      <input type="text" name="name" v-model="name" /> |
-      <input type="text" name="login" v-model="login" /> |
-      <input type="password" name="password" v-model="password" /> |
+      <div class="form-group">
+        <label for="signup_name">Name</label>
+        <input
+          id="signup_name"
+          class="form-control"
+          type="text"
+          name="name"
+          v-model="name"
+        />
+      </div>
+      <div class="form-group">
+        <label for="signup_login">Login</label>
+        <input
+          id="signup_login"
+          class="form-control"
+          type="text"
+          name="login"
+          v-model="login"
+        />
+      </div>
+      <div class="form-group">
+        <label for="signup_password">Password</label>
+        <input
+          id="signup_password"
+          class="form-control"
+          type="password"
+          name="password"
+          v-model="password"
+        />
+      </div>
     </form>
     <slot></slot>
     <template v-slot:footer>
-      <button type="submit" class="btn btn-primary" form="signup">
+      <button type="submit" class="btn btn-primary btn-sm" form="signup">
         Регистрация
       </button>
       <button
         type="button"
-        class="btn btn-secondary"
+        class="btn btn-secondary btn-sm"
         data-dismiss="modal"
         @click="close"
       >
@@ -47,10 +74,17 @@ export default Vue.extend({
   },
 
   methods: {
+    reset() {
+      this.name = "";
+      this.login = "";
+      this.password = "";
+    },
+
     submit() {
       const name = this.name;
       const login = this.login;
       const password = this.password;
+
       this.$emit("submit", { name, login, password });
     }
   }
