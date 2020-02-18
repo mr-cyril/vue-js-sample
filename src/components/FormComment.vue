@@ -9,18 +9,21 @@
           v-model="text"
         ></textarea>
       </div>
-      <button class="btn btn-outline-primary btn-sm" type="submit">
+      <div class="d-flex justify-content-center">
+        <button class="btn btn-outline-primary btn-sm" type="submit">
+          Add comment
+        </button>
+      </div>
+    </form>
+    <div v-else class="d-flex justify-content-center">
+      <button
+        class="btn btn-outline-secondary btn-sm"
+        type="button"
+        @click="toggleFormActive"
+      >
         Add comment
       </button>
-    </form>
-    <button
-      v-else
-      class="btn btn-outline-secondary btn-sm"
-      type="button"
-      @click="toggleFormActive"
-    >
-      Add comment
-    </button>
+    </div>
   </transition>
 </template>
 

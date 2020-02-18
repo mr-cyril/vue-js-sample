@@ -1,10 +1,31 @@
 <template>
   <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link>|
-      <router-link to="/article">Article</router-link>
-    </div>
-
+    <ul class="nav nav-tabs justify-content-center pt-3">
+      <li class="nav-item">
+        <router-link to="/" exact v-slot="{ href, navigate, isActive }">
+          <a
+            class="nav-link"
+            :class="{ active: isActive }"
+            :active="isActive"
+            :href="href"
+            @click="navigate"
+            >Home</a
+          >
+        </router-link>
+      </li>
+      <li class="nav-item">
+        <router-link to="/article" v-slot="{ href, navigate, isActive }">
+          <a
+            class="nav-link"
+            :class="{ active: isActive }"
+            :active="isActive"
+            :href="href"
+            @click="navigate"
+            >Article</a
+          >
+        </router-link>
+      </li>
+    </ul>
     <router-view />
   </div>
 </template>
@@ -31,20 +52,5 @@ export default Vue.extend({
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
-
-#nav {
-  padding: 30px;
-
-  a {
-    font-weight: bold;
-    color: #2c3e50;
-
-    &.router-link-exact-active {
-      color: #42b983;
-    }
-  }
 }
 </style>

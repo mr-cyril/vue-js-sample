@@ -25,7 +25,12 @@
     </form>
     <slot></slot>
     <template v-slot:footer>
-      <button type="submit" class="btn btn-primary btn-sm" form="signin">
+      <button
+        type="submit"
+        class="btn btn-primary btn-sm"
+        form="signin"
+        :disabled="!isComplete"
+      >
         Войти
       </button>
       <button
@@ -61,6 +66,12 @@ export default Vue.extend({
       login: "",
       password: ""
     };
+  },
+
+  computed: {
+    isComplete() {
+      return this.login && this.password;
+    }
   },
 
   methods: {

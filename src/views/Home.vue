@@ -1,30 +1,35 @@
 <template>
-  <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png" />
+  <div class="home p-3">
+    <div class="text-center mb-2">
+      <img alt="Vue logo" src="../assets/logo.png" />
+    </div>
 
     <div>
       <template v-if="!isAuthenticated">
-        <button
-          class="btn btn-outline-primary btn-sm"
-          type="button"
-          @click="openModal(modalType.signup)"
-        >
-          Регистрация
-        </button>
-        |
-        <button
-          class="btn btn-primary btn-sm"
-          type="button"
-          @click="openModal(modalType.signin)"
-        >
-          Авторизация
-        </button>
+        <div class="d-flex align-items-center justify-content-center">
+          <button
+            class="btn btn-outline-primary btn-sm mr-3"
+            type="button"
+            @click="openModal(modalType.signup)"
+          >
+            Регистрация
+          </button>
+          <button
+            class="btn btn-primary btn-sm"
+            type="button"
+            @click="openModal(modalType.signin)"
+          >
+            Авторизация
+          </button>
+        </div>
       </template>
       <template v-else-if="isAuthorized">
-        <span>{{ user.name }}</span> |
-        <button class="btn btn-primary btn-sm" type="button" @click="signout">
-          Выход
-        </button>
+        <div class="d-flex align-items-center justify-content-center">
+          <div class="mr-2">{{ user.name }}</div>
+          <button class="btn btn-primary btn-sm" type="button" @click="signout">
+            Выход
+          </button>
+        </div>
       </template>
       <template v-else-if="isLoading">
         <div class="d-flex justify-content-center">
@@ -40,7 +45,13 @@
       @hide="unselectFormComponent"
       @close="closeModal"
       @submit="onSubmit"
-    />
+    >
+      <FadeTransition :duration="300">
+        <div v-if="error" class="alert alert-danger" role="alert">
+          {{ error }}
+        </div>
+      </FadeTransition>
+    </component>
     <ModalBackdrop v-if="selectedModalComponent" :open="showModal" />
   </div>
 </template>
@@ -52,6 +63,7 @@ import { mapGetters, mapActions } from "vuex";
 import ModalSignIn from "@/components/ModalSignIn.vue";
 import ModalSignUp from "@/components/ModalSignUp.vue";
 import ModalBackdrop from "@/components/ModalBackdrop.vue";
+import FadeTransition from "@/components/FadeTransition.vue";
 import Spinner from "@/components/Spinner.vue";
 
 const modalType = Object.freeze({
@@ -66,6 +78,7 @@ export default Vue.extend({
     ModalSignIn,
     ModalSignUp,
     ModalBackdrop,
+    FadeTransition,
     Spinner
   },
 
@@ -82,6 +95,7 @@ export default Vue.extend({
       isAuthenticated: "auth/isAuthenticated",
       isAuthorized: "auth/isAuthorized",
       isLoading: "auth/isLoading",
+      error: "auth/error",
       user: "auth/user"
     })
   },

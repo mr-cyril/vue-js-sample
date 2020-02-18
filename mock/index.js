@@ -39,7 +39,7 @@ const selectArticleCommentsById = id =>
   );
 
 const selectArticleCommentsLastInsertId = () =>
-  _.defaultTo(_.toNumber(_.get(_.last(articleComments), "id")), 0);
+  _.defaultTo(_.toNumber(_.get(_.last(db.articleComments), "id")), 0);
 
 const getToken = request => {
   const authorization = _.defaultTo(request.headers.authorization, "");
@@ -49,37 +49,6 @@ const getToken = request => {
 };
 
 export default {
-  // "GET /api/user": {
-  //   username: "admin",
-  //   sex: 5
-  // },
-  // "GET /api/list": function(req, res) {
-  //   let query = req.query || {};
-  //   return res.json({
-  //     limit: query.limit,
-  //     offset: query.offset,
-  //     list: [
-  //       {
-  //         username: "admin1",
-  //         sex: 1
-  //       },
-  //       {
-  //         username: "admin2",
-  //         sex: 0
-  //       }
-  //     ]
-  //   });
-  // },
-  // "DELETE /api/user/:id": (req, res) => {
-  //   // console.log(req.params.id);
-  //   res.send({ status: "ok", message: "delete success!" });
-  // },
-  // "PUT /api/user/:id": (req, res) => {
-  //   // console.log(req.params.id);
-  //   // console.log(req.body);
-  //   res.send({ status: "ok", message: "update success！" });
-  // },
-
   "POST /api/signin": (req, res) => {
     const { login, password } = req.body;
     const record = _.find(
@@ -127,7 +96,7 @@ export default {
   },
   "POST /api/articles/comments": (req, res) => {
     const { articleId, userId, datetime, text } = req.body;
-    const lastId = selectArticleCommentsLastInsertId(articleId);
+    const lastId = selectArticleCommentsLastInsertId();
     const id = lastId > 0 ? lastId + 1 : 1;
     const user = null;
     const record = { id, articleId, userId, user, datetime, text };

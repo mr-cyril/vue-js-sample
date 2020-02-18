@@ -1,38 +1,34 @@
 <template>
-  <div class="article">
+  <div class="article p-3">
     <template v-if="detail">
-      <h1>{{ detail.name }}</h1>
-      <div>{{ detail.text }}</div>
+      <div class="w-75 mx-auto mb-3">
+        <div class="card">
+          <div class="card-body">
+            <h1 class="card-title" v-html="detail.name" />
+            <div class="card-text" v-html="detail.text" />
+          </div>
+        </div>
+      </div>
     </template>
     <template v-else-if="isLoading">
-      <div class="d-flex justify-content-center">
+      <div class="d-flex justify-content-center mb-3">
         <Spinner tagName="div" color="primary" />
       </div>
     </template>
 
     <template v-if="comments.length">
-      <div class="w-50 p-3 mx-auto">
-        <FadeTransition group tag="ul" class="list-group" :duration="300">
-          <li
-            v-for="comment in comments"
-            :key="comment.id"
-            class="list-group-item"
-          >
-            <span v-if="comment.datetime">{{ comment.datetime | moment }}</span>
-            | <span>{{ comment.user.name }}</span> |
-            <span>{{ comment.text }}</span>
-          </li>
-        </FadeTransition>
+      <div class="w-50 p-3 mx-auto mb-3">
+        <ArticleComments :comments="comments" />
       </div>
     </template>
     <template v-else-if="isLoading">
-      <div class="d-flex justify-content-center">
+      <div class="d-flex justify-content-center mb-3">
         <Spinner tagName="div" color="primary" />
       </div>
     </template>
 
     <template v-if="detail && isAuthorized">
-      <div class="w-50 p-3 mx-auto">
+      <div class="w-50 mx-auto">
         <FormComment
           ref="form"
           :articleId="detail.id"
@@ -51,8 +47,7 @@ import _ from "lodash";
 
 import Spinner from "@/components/Spinner.vue";
 import FormComment from "@/components/FormComment.vue";
-import FadeTransition from "@/components/FadeTransition.vue";
-import momentFilter from "@/filters/momentFilter";
+import ArticleComments from "@/components/ArticleComments.vue";
 
 export default Vue.extend({
   name: "Article",
@@ -60,15 +55,7 @@ export default Vue.extend({
   components: {
     Spinner,
     FormComment,
-    FadeTransition
-  },
-
-  filters: {
-    moment: momentFilter
-  },
-
-  data() {
-    return {};
+    ArticleComments
   },
 
   computed: {
@@ -89,7 +76,6 @@ export default Vue.extend({
 
     async onSubmit(...args) {
       await this.createComment(...args);
-      console.log("createComment", ...args);
       await this.$nextTick();
       if (this.$refs.form) {
         this.$refs.form.reset();
